@@ -8,12 +8,13 @@ export default async function handler(req, res) {
     }
 
     try {
-        const ttbKey = process.env.ALADIN_API_KEY;
+        // 대표님께서 Vercel에 저장하신 키 이름(ALADIN_TTB_KEY)으로 완벽하게 맞췄습니다.
+        const ttbKey = process.env.ALADIN_TTB_KEY;
+        
         if (!ttbKey) {
-            return res.status(500).json({ success: false, error: "ALADIN_API_KEY 환경 변수가 설정되지 않았습니다." });
+            return res.status(500).json({ success: false, error: "ALADIN_TTB_KEY 환경 변수가 설정되지 않았습니다." });
         }
 
-        // 검증된 ItemSearch.aspx 기반으로 '자기계발' 베스트셀러 조회
         const aladinUrl = `https://www.aladin.co.kr/ttb/api/ItemSearch.aspx?ttbkey=${ttbKey}&Query=자기계발&QueryType=Bestseller&MaxResults=3&start=1&SearchTarget=Book&output=js&Version=20131101`;
         
         const response = await fetch(aladinUrl);
