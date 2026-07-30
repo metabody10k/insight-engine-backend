@@ -13,24 +13,25 @@ export default async function handler(req, res) {
             return res.status(500).json({ success: false, error: "ALADIN_API_KEY 환경 변수가 설정되지 않았습니다." });
         }
 
-        // https 프로토콜 적용 및 베스트셀러 API 호출
-        const aladinUrl = `https://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=${ttbKey}&QueryType=Bestseller&CategoryId=170&MaxResults=3&start=1&SearchTarget=Book&output=js&Version=20131101`;
+        // 카테고리 코드를 제거하고 전체 실시간 베스트셀러(Bestseller)로 안전하게 호출
+        const aladinUrl = `https://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=${ttbKey}&QueryType=Bestseller&MaxResults=3&start=1&SearchTarget=Book&output=js&Version=20131101`;
         
         const response = await fetch(aladinUrl);
         const text = await response.text();
 
+        // 응답 텍스트에 JSON 객체가 포함되어 있는지 확인
         const jsonStartIndex = text.indexOf('{');
         const jsonEndIndex = text.lastIndexOf('}');
         
         if (jsonStartIndex === -1 || jsonEndIndex === -1) {
-            return res.status(500).json({ success: false, error: "알라딘 API 응답 형식 오류", raw: text.substring(0, 100) });
+            return res.status(500).json({ success: false, error: "알라딘 API 응답 형식 오류", raw: text });
         }
 
         const jsonString = text.substring(jsonStartIndex, jsonEndIndex + 1);
         const data = JSON.parse(jsonString);
 
         if (!data.item || data.item.length === 0) {
-            return res.status(200).json({ success: false, books: [] });
+            return res.status(200).json({ success: false, books: [], message: "데이터가 없습니다." });
         }
 
         const books = data.item.map(book => ({
